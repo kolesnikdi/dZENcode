@@ -1,0 +1,112 @@
+version: "3.9"
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Docker/web/Dockerfile
+    command:
+      - /bin/sh
+      - -c
+      - |
+        apt-get update && apt-get install netcat mc -y 
+        pip3 install --upgrade pip 
+        pip3 install -r requirements.txt
+        python manage.py collectstatic --noinput
+        python manage.py makemigrations
+        python manage.py migrate
+        echo "WEB: Migrations process done ..."
+        echo " "
+        echo "                           "
+        echo " ++          +          ++ "
+        echo " ++++       +++       ++++ "
+        echo " ++  +     +++++     +  ++ "
+        echo " ++  ++    +++++    ++  ++ "
+        echo " ++  ++     +++     ++  ++ "
+        echo " ++   ++    +++    ++   ++ "
+        echo " ++   ++    +++    ++   ++ "
+        echo " ++  ++    ++ ++    ++  ++ "
+        echo " +++++    ++   ++    +++++ "
+        echo " ++ +++++++     +++++++ ++ "
+        echo " ++   +++++++++++++++   ++ "
+        echo " ++ ++++  ++++++  ++++ +++ "
+        echo " +++++++++++++++++++++++++ "
+        echo "       ++  ++++  ++        "
+        echo "        ++++++++++         "
+        echo "          ++++++           "
+        echo "            ++             "
+        echo "                           "
+        echo " "
+        python manage.py runserver 0.0.0.0:8000
+#        echo "from registration.models import WebMenuUser; WebMenuUser.objects.filter(email='1234567899@admin.com').exists() or WebMenuUser.objects.create_superuser(mobile_phone='+380634444444', email='1234567899@admin.com', password='$DJANGO_SUPERUSER_PASSWORD')" | python manage.py shell &&
+    ports:
+      - 8000:8000
+    volumes:
+      - .:/web_frm
+    env_file:
+      - .env
+    depends_on:
+      - db
+      - redis_app
+      - beat
+      - worker
+
+  db:
+    image: postgres:16.1
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - .env
+    ports:
+      - 5433:5432  # local port : container port
+    expose:
+      - 5432
+
+  adminer:
+    image: adminer:4.8.1
+    restart: always
+    environment:
+      ADMINER_DEFAULT_SERVER: db
+    depends_on:
+      - db
+    ports:
+      - 8081:8080
+
+  redis_app:
+    image: redis:7.2.4
+    ports:
+      - 6379:6379
+    expose:
+      - 6379
+
+  worker: # make task immediately
+    build:
+      context: .
+      dockerfile:
+        Docker/celery/Dockerfile
+    volumes:
+      - ./:/worker
+    command: celery -A celery_app.celery worker -l info
+    env_file:
+      - .env
+    depends_on:
+      - redis_app
+    environment:
+      - CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP=true
+
+  beat: # make task on schedule
+    build:
+      context: .
+      dockerfile:
+        Docker/celery/Dockerfile
+    volumes:
+      - ./:/beat
+    command: celery -A celery_app.celery beat -l info
+    env_file:
+      - .env
+    depends_on:
+      - redis_app
+    environment:
+      - CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP=true
+
+volumes:
+  postgres_data:
