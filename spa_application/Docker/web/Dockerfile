@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install netcat-traditional
 
 # Set work directory
 # Maine folder will be create with such name in docker container
-WORKDIR /web_frm
+WORKDIR /spa_application
 
 # Install dependencies
 RUN pip3 install --upgrade pip

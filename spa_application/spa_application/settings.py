@@ -2,8 +2,6 @@ import os
 import redis
 from dotenv import load_dotenv
 from pathlib import Path
-from datetime import timedelta
-from rest_framework.settings import api_settings
 
 load_dotenv()
 
@@ -29,23 +27,18 @@ INSTALLED_APPS = [
     # libraries
     'rest_framework',
     'django_filters',
-    'phonenumber_field',
-    'knox',
-    'django_user_agents',
     # applications
+    'comments',
 ]
-
-AUTH_USER_MODEL = 'accounts.User'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
+    'custom_middleware.CustomSessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',    # CSRF
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django_user_agents.middleware.UserAgentMiddleware',
 ]
 
 ROOT_URLCONF = 'spa_application.urls'
@@ -95,11 +88,6 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 LANGUAGE_CODE = 'en'
-# TODO relocate to DB
-LANGUAGES = [
-    ('en', 'English'),
-    ('uk', 'Ukrainian'),
-]
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
@@ -114,7 +102,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'knox.auth.TokenAuthentication',
+        'rest_framework.authentication.BasicAuthentication',      # CSRF
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly',
@@ -123,58 +111,36 @@ REST_FRAMEWORK = {
         'django_filters.rest_framework.DjangoFilterBackend',
     ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10,
+    'PAGE_SIZE': 25,
 }
-
-REST_KNOX = {
-    'SECURE_HASH_ALGORITHM': 'cryptography.hazmat.primitives.hashes.SHA512',
-    'AUTH_TOKEN_CHARACTER_LENGTH': 64,
-    'TOKEN_TTL': timedelta(hours=24),
-    'USER_SERIALIZER': 'registration.serializers.WebMenuUserSerializer',  # displays all data in the view
-    'TOKEN_LIMIT_PER_USER': 1,
-    'AUTO_REFRESH': True,
-    'MIN_REFRESH_INTERVAL': 11 * 60 * 60,
-    'EXPIRY_DATETIME_FORMAT': api_settings.DATETIME_FORMAT,
-}
-
-# email settings
-EMAIL_HOST = os.environ.get('EMAIL_HOST') # TODO relocate to DB
-EMAIL_PORT = 2525
-EMAIL_USE_SSL = True
+# here we store request.session.session_key
+SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+SESSION_SAVE_EVERY_REQUEST = True
 
 # Caches / Redis settings
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
         'LOCATION': 'redis://redis_app:6379/0',
-        'TIMEOUT': 300,  # default timeout for all chash
+        'TIMEOUT': 300,
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
         },
-        'KEY_PREFIX': 'web_frm',
+        'KEY_PREFIX': 'spa_application',
     },
 }
 CACHE_TIMEOUT = {
-    '2fa': {
-        'Email':  60 * 5, },
+    'captcha': 120,
+    'list_comment': 30,
+    'list_comments': 30,
+    'new_comments': 125,
+    'reply_comments': 125,
 }
 
 """ Redis settings to use Redis db directly."""
 REDIS_CONNECTION = redis.StrictRedis(host='redis_app', port=6379, db=3)
 
-""" all user-agents will store in Redis """
-USER_AGENTS_CACHE = 'default'
-
-# Celery settings
-timezone = 'UTC'
-CELERY_TASK_TRACK_STARTED = True
-CELERYD_TIME_LIMIT = 30 * 60
-CELERY_broker_url = 'redis://redis_app:6379/1'
-result_backend = 'redis://redis_app:6379/2'
-
 if RUN_FROM_LOCAL:
     DATABASES["default"]["HOST"] = 'localhost'
     DATABASES["default"]["PORT"] = '5433'
     CACHES["default"]['LOCATION'] = 'redis://localhost:6379/0'
-    CELERY_broker_url = ('redis://localhost:6379/1')
-    result_backend = 'redis://localhost:6379/2'

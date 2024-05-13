@@ -1,11 +1,10 @@
-from django.urls import path, re_path
-from loan.views import CreateLoanView, UpdatePaymentView, ListLoanView
+from django.urls import path
+
+from comments.views import NewCommentView, ReplyCommentView, ListCommentView, ListCommentsView
 
 urlpatterns = [
-    path('', CreateLoanView.as_view(), name='create_loan'),  # post method
-    re_path(r'^(?P<contract>[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89aAbB][a-f0-9]{3}-[a-f0-9]{12})/$',
-            ListLoanView.as_view(),
-            name='loan_payments',
-            ),  # get method
-    path('payment/<int:id>/', UpdatePaymentView.as_view(), name='payment'),  # post method
+    path('comments/', ListCommentsView.as_view(), name='comments'),
+    path('comments/new/', NewCommentView.as_view(), name='new_comment'),
+    path('comments/<int:id>/', ListCommentView.as_view(), name='comment'),
+    path('comments/<int:id>/new', ReplyCommentView.as_view(), name='reply_comment'),
 ]

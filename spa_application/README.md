@@ -1,42 +1,53 @@
-Description in English and Ukrainian
-# LoanCalculator
-Create loan agreements with an annuity payment schedule. Review agreements and payment schedules.
-Change the body of any payment with subsequent recalculation of the entire payment schedule. Saving the history of all
-payments.
-## Project launch 
-docker-compose up --build
+# spa_application
+Як і домовлялися зроблений Backend. Тестове завдання виконано як API тому в подальшому можливо додати той Frontend
+який необхідний. Всі умови які можливо було обробити на Backend виконано.
+Модель для зберігання коментарів була вибрана MP_Node тому сортування та пагінація була виконана через пряме звернення 
+до базових класів. За відсутності авторизованих користувачів та для реалізації CAPTCHA та кешування запитів потрібна 
+була унікальність запиту тому був доданий CustomSessionMiddleware який забезпечує створення сесії користувача зразу з
+першого запиту. Ключі сесій зберігаються в Redis через CACHES. Дані для валідації так само передаються через
+CACHES(Redis). Всі коментарі зберігаються в PostgreSQL включно з усіма даними користувача.
+Доступ до БД через adminer. Після запуску проєкту в БД вже будуть необхідні коментарі для перевірки.
+Для зменшення навантаження на систему та БД було застосовано кешування всіх сторінок. Строк життя кешу налаштовується в
+settings окремо для кожного випадку. Кешування запиту на відображення коментарів 30 сек. На додавання коментарів 125 сек
+синхронізовано з терміном життя CAPTCHA. 
+XSS - не передбачена так як це контролює Frontend.
+SQL ін'єкції - Базовий захист DjangoORM
+Схема БД (model_schema) знаходиться в цій же директорії.
 
-## Endpoints
-### http://127.0.0.1:8000/loan/ --> Creating a new Loan with payments to it.
-#### loan_amount = from 0,01 to 99999999,99.
-#### loan_start_date = format 2023-07-10.
-#### periodicity_amount = from 1 to 365.
-#### periodicity = 1 - day, 2 - week, 3 - month.
-#### number_of_payments =  from 1 to 365.
-#### interest_rate = % from 0,01 to 99.
-### http://127.0.0.1:8000/loan/<uuid4:contract>/ --> Revision of the loan agreement and payment schedule.
-### http://127.0.0.1:8000/loan/payment/<int:id>/ --> Change the payment body and recreate the payment schedule.
-#### subtract_sum =  to the value of the current payment body.
+## Використані інструменти:
+Django, DRF, PostgreSQL, Redis, MP_Node, Pillow, captcha, adminer, Pytest
 
-## Test by Pytest
-
-# LoanCalculator
-Створення кредитних договорів з ануїтетним графіком погашення. Перегляд договорів та графіків платежів.
-Зміна тіла будь-якого платежу з подальшим перерахунком всього графіку платежів. Збереження історії всіх платежів.
 ## Запуск проекту 
+cd .\spa_application\
 docker-compose up --build
 
-#### Test by Pytest
-pytest
+[//]: # (#### Test by Pytest)
+
+[//]: # (pytest)
 
 ## Endpoints
-### http://127.0.0.1:8000/loan/ --> Створення нового Кредиту з платежами до нього.
-#### loan_amount = від 0,01 до 99999999,99.
-#### loan_start_date = формат 2023-07-10.
-#### periodicity_amount = від 1 до 365.
-#### periodicity = 1 - день, 2 - тиждень, 3 - місяць.
-#### number_of_payments =  від 1 до 365.
-#### interest_rate = % від 0,01 до 99.
-### http://127.0.0.1:8000/loan/<uuid4:contract>/ --> Перегляд кредитного договору та графіку платежів.
-### http://127.0.0.1:8000/loan/payment/<int:id>/ --> Зміна тіла платежу та перествореня графіку платежів.
-#### subtract_sum =  від 0,01 до значення тіла поточного платежу.
+### http://127.0.0.1:8000/comments/ --> Всі заглавні коментарі. Базова фільтрація LIFO. На кожній сторінці по 25 записів.
+### Сортування Заглавних коментарів
+#### http://127.0.0.1:8000/comments/?page=2&ordering=-username
+#### http://127.0.0.1:8000/comments/?page=2&ordering=username
+#### http://127.0.0.1:8000/comments/?ordering=email
+#### http://127.0.0.1:8000/comments/?ordering=-email
+#### http://127.0.0.1:8000/comments/?ordering=created_date
+#### http://127.0.0.1:8000/comments/?ordering=-created_date
+### http://127.0.0.1:8000/comments/1 --> Перегляд коментаря та всіх коментарів на нього. Каскадне відображення
+### Посилання на додавання заглавного коментаря та коментарів до коментарів.
+### http://127.0.0.1:8000/comments/new
+### http://127.0.0.1:8000/comments/1/new
+#### User Name --> обов'язкове поле
+#### E-mail --> обов'язкове поле. Базовий EmailField
+#### Home page --> Не обов'язкове поле. Може бути пустим
+#### CAPTCHA --> на метод GET повертає зображення як байтовий об'єкт. На метод POST приймає текст. 
+#### Capcha до підтвердження зберігається в Redis з унікальним ключом який поєднує в собі sessionid та csrftoken токен.
+#### Для можливості мануального тестування в консолі буде надруковано <<<<<<captcha_for_manual_test>>>>>>>>Capcha
+#### Термін життя CAPTCHA = 120 сек..
+#### Text --> Обмеження в 100 кб реалізоване як обмеження в 102400 символів. Додана перевірка, щоб теги були закриті. 
+#### Додана перевірка на дозволені теги: < a href=”” title=””> < /a> < code> < /code> < i> < /i> < strong> < /strong>. 
+#### Image --> Користувач може додавати зображення. Дозволені формати JPG, GIF, PNG. 
+#### Зображення які більше 320х240 пікселів конвертуються у розмір 320х240.
+### http://127.0.0.1:8082 --> Доступ до БД. Логін та Пароль в файлі .env
+

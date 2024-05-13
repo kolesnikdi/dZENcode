@@ -7,8 +7,8 @@ from comments.models import Comment
 
 def create_root(i):
     root = Comment.add_root(
-        username=''.join(random.choice(string.hexdigits) for i in range(10)) + "@gmail.com",
-        email=''.join(random.choice(string.hexdigits) for i in range(10)),
+        username=''.join(random.choice(string.hexdigits) for i in range(10)),
+        email=''.join(random.choice(string.hexdigits) for i in range(10)) + "@gmail.com",
         text=''.join(random.choice(string.ascii_letters) for i in range(i * 10)).title()
     )
     return root
