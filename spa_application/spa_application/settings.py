@@ -28,7 +28,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_filters',
     'drf_yasg',
-    # 'swagger',
     # applications
     'comments',
 ]
@@ -37,7 +36,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'custom_middleware.CustomSessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',    # CSRF
+    'django.middleware.csrf.CsrfViewMiddleware',  # CSRF
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -104,7 +103,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework.authentication.BasicAuthentication',      # CSRF
+        'rest_framework.authentication.BasicAuthentication',  # CSRF
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly',
