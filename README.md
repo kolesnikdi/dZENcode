@@ -23,8 +23,12 @@
 - Схема БД (model_schema) знаходиться в цій же директорії.
 
 ## Запуск проекту 
-cd .\spa_application\
-docker-compose up
+- git clone https://github.com/kolesnikdi/dZENcode.git
+- cd .\dZENcode\spa_application
+- Скопіюй .env файл до \dZENcode\spa_application
+- docker-compose up --build
+- При потребі в рандомних коментарях. Термінал Docker -> spa_application `python3 manage.py add_comments`
+- Запуск end-to-end тестів. Термінал Docker -> spa_application `pytest`
 
 
 ## Endpoints
@@ -54,4 +58,5 @@ docker-compose up
 
 ### Інші посилання 
 [swagger](http://127.0.0.1:8000/swagger) Доступно в DEV-режимі.
+
 [adminer](http://127.0.0.1:8082) Логін та Пароль в файлі .env

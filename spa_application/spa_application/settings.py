@@ -11,7 +11,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 
 DEBUG = True
 
-RUN_FROM_LOCAL = True
+RUN_FROM_LOCAL = False
 
 HOST = os.environ.get('HOST_NAME')
 
@@ -116,7 +116,7 @@ REST_FRAMEWORK = {
 }
 # here we store request.session.session_key
 SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
-SESSION_SAVE_EVERY_REQUEST = True
+SESSION_SAVE_EVERY_REQUEST = False
 
 # Caches / Redis settings
 CACHES = {
