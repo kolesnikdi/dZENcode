@@ -11,7 +11,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 
 DEBUG = True
 
-RUN_FROM_LOCAL = False
+RUN_FROM_LOCAL = True
 
 HOST = os.environ.get('HOST_NAME')
 
@@ -27,6 +27,8 @@ INSTALLED_APPS = [
     # libraries
     'rest_framework',
     'django_filters',
+    'drf_yasg',
+    # 'swagger',
     # applications
     'comments',
 ]
@@ -133,8 +135,8 @@ CACHE_TIMEOUT = {
     'captcha': 120,
     'list_comment': 30,
     'list_comments': 30,
-    'new_comments': 125,
-    'reply_comments': 125,
+    'new_comments': 120,
+    'reply_comments': 120,
 }
 
 """ Redis settings to use Redis db directly."""

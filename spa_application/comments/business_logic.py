@@ -16,12 +16,10 @@ def validate_image(image):
         try:
             img = PILImage.open(image)
             img_format = img.format.upper()
-            print(img_format)
             if img_format not in ['JPEG', 'GIF', 'PNG']:
                 return {'error': 'Upload image only in next formats JPEG, GIF, PNG'}
         except Exception as e:
-            print(e)
-            return {'error': '_Upload image only in next formats JPEG, GIF, PNG'}
+            return {'error': 'Upload image only in next formats JPEG, GIF, PNG'}
         img_width, img_height = img.size
         if img_width > 320 or img_height > 240:
             img.thumbnail((320, 240))
