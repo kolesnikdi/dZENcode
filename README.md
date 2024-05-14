@@ -27,8 +27,8 @@
 - cd .\dZENcode\spa_application
 - Скопіюй .env файл до \dZENcode\spa_application
 - docker-compose up --build
-- При потребі в рандомних коментарях. Термінал Docker -> spa_application `python3 manage.py add_comments`
-- Запуск end-to-end тестів. Термінал Docker -> spa_application `pytest`
+- При потребі в рандомних коментарях. Термінал Docker -> spa_application -> web-1 `python3 manage.py add_comments`
+- Запуск end-to-end тестів. Термінал Docker -> spa_application -> web-1 `pytest`
 
 
 ## Endpoints
